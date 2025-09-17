@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
+from figma_mcp.tools import files, exports, projects
 
 load_dotenv()
 
@@ -34,11 +35,7 @@ async def http_exception_handler(request: Request, exc: httpx.HTTPStatusError):
 async def root():
     return {"message": "Welcome to the Figma MCP Server"}
 
-# Example endpoint
-@app.get("/v1/files/{key}")
-async def get_file_data(key: str):
-    url = f"https://api.figma.com/v1/files/{key}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=HEADERS)
-        response.raise_for_status()
-        return response.json()
+# Include routers from tools
+app.include_router(files.router, prefix="/v1/files")
+app.include_router(exports.router, prefix="/v1/images")
+app.include_router(projects.router, prefix="/v1/teams")
